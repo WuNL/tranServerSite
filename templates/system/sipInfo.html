@@ -1,0 +1,51 @@
+{% extends "system/base.html" %}
+
+{% block title %}
+<title>修改Sip信息</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">修改Sip信息</h3>
+		</div>
+		<div class="panel-body">
+			<div class="row-fluid">
+				<div class="col-md-4">
+
+					<form role="form" href="/system/sipInfo/" method="post">
+						{% csrf_token %}
+						{% for field in form %}
+							<div class="form-group">
+								
+								{{field.label_tag}} {% if field.errors %} {% for err in field.errors %} {{err}} {% endfor %} {% endif %}
+								{{field}}
+							</div>
+
+						{% endfor %}
+						<button type="submit" class="btn btn-default">提交修改</button>
+					</form>
+			{% if msg %}
+			{% ifequal msg "success" %}
+			<div class="margin" style="margin:14px 0px 0px 0px;">
+				<div class="alert alert-success" role="alert" >{{msgContent}}</div>
+			</div>
+			{% else %}
+			<div class="margin" style="margin:14px 0px 0px 0px;">
+				<div class="alert alert-danger" role="alert" >{{msgContent}}</div>
+			</div>
+			{% endifequal %}
+			{% endif %}
+				</div>
+			</div>
+
+		</div>
+
+		<div class="panel-footer">注：sipID需要的参数</div>
+	</div>
+</div>
+
+{%endblock%}

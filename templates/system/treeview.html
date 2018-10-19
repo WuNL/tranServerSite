@@ -1,0 +1,668 @@
+{% extends "system/base.html" %}
+
+{% block title %}
+<title>鉴权配置</title>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="container">
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">鉴权列表</h3>
+		</div>
+		<div class="panel-body">
+
+            {% if msg %}
+            <p> {{msg}} </p>
+            {% else %}
+
+            <div class="row-fluid" >
+
+                <div id="msglayer">
+
+                </div>
+
+                <div class="col-md-12" style="border-style: solid;margin-bottom: 10px">
+
+
+
+                    {% for item in posList %}
+                    <label class="checkbox-inline">
+                        <input type="checkbox" name="items" id="{{item}}" value="{{item}}"> {{item}}
+                    </label>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+
+
+            <div class="row">
+                <div class="col-md-6">
+                 <div class="list-op" id="list-op">
+<!-- 						<a id="btn-check-all" class="btn btn-default btn-sm" role="button">
+							<span class="glyphicon glyphicon-check" aria-hidden="true"></span>全选
+						</a>
+						<a id="btn-uncheck-all" class="btn btn-default btn-sm" role="button">
+							<span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>全不选
+						</a> -->
+                        <a id="applyFilter" class="btn btn-default btn-sm" role="button">
+                            <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>应用筛选
+                        </a>
+                        <a id="getchecked" class="btn btn-default btn-sm" role="button">
+                           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添加到本地
+                       </a>	
+                       <a id="syncDB" class="btn btn-default btn-sm" role="button">
+                           <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>手动同步数据库
+                       </a>									
+                   </div>			
+                   <div id="treeremote"></div>
+               </div>
+
+               <div class="col-md-6">
+                 <div class="list-op" id="list-op">
+                  <a id="btn-check-all" class="btn btn-default btn-sm" role="button">
+                   <span class="glyphicon glyphicon-check" aria-hidden="true"></span>全选
+               </a>
+               <a id="btn-uncheck-all" class="btn btn-default btn-sm" role="button">
+                   <span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>全不选
+               </a>
+<!-- 						<a id="save" class="btn btn-default btn-sm" role="button">
+							<span class="glyphicon glyphicon-save" aria-hidden="true"></span>保存
+						</a> -->				
+						<a id="delete" class="btn btn-default btn-sm" role="button">
+							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+						</a>
+                        <a id="notify" class="btn btn-default btn-sm" role="button">
+                            <span class="glyphicon glyphicon-notify" aria-hidden="true"></span>通知用户
+                        </a>
+                        <input type="text" name="sip" id="sip" placeholder="sipid"> 
+                        <select id="curUser">
+                           <option value="0">请选择用户</option>
+                           {% for user in users %}
+                           <option value="{{user.userid}}">{{user.username}}</option>
+                           {% endfor %}
+                       </select>
+                   </div>			
+                   <div id="treelocal"></div>
+               </div>
+           </div>		
+       </div>
+
+       {% endif %}
+       <div class="panel-footer">注：一个通道只能提供一个用户使用</div>
+   </div>
+</div>
+
+{% if msg %}
+
+{% else %}
+<script type="text/javascript">
+
+    if(typeof Array.prototype.forEach != 'function'){
+        Array.prototype.forEach = function(callback){
+            for( var i = 0; i<this.length;i++){
+                callback.apply(this,[this[i],i,this]);
+            }
+        };
+    }
+
+
+    function getLocalData(){
+      var defaultData = [
+      {
+       text: 'Parent 1',
+       href: '#parent1',
+       tags: ['4'],
+       nodes: [
+       {
+        text: 'Child 1',
+        href: '#child1',
+        tags: ['2'],
+        nodes: [
+        {
+         text: 'Grandchild 1',
+         href: '#grandchild1',
+         tags: ['0']
+     },
+     {
+         text: 'Grandchild 2',
+         href: '#grandchild2',
+         tags: ['0']
+     }
+     ]
+ },
+ {
+    text: 'Child 2',
+    href: '#child2',
+    tags: ['0']
+}
+]
+},
+{
+   text: 'Parent 2',
+   href: '#parent2',
+   tags: ['0']
+},
+{
+   text: 'Parent 3',
+   href: '#parent3',
+   tags: ['0']
+},
+{
+   text: 'Parent 4',
+   href: '#parent4',
+   tags: ['0']
+},
+{
+   text: 'Parent 5',
+   href: '#parent5'  ,
+   tags: ['0']
+}
+];
+return defaultData;
+}
+function getRemoteData(){
+  var defaultData=[];
+
+  $.ajax({
+   type:"GET",
+   url:"/system/configJQ/",
+   dataType:"json",
+   success:function(data){
+    defaultData = defaultData.concat(data);
+},
+async:false
+});
+		// console.log("2    ",defaultData);
+		return defaultData;
+
+		// $.get('/system/configJQ/', function(treelist){
+		// 	// console.log(treelist);
+		// 	defaultData = defaultData.concat(treelist);
+		// 	console.log("1    ",defaultData);
+		// },'json');
+		// console.log("2    ",defaultData);
+		// return defaultData;
+	};
+
+	function _getChildren(node){
+		if (node.nodes === undefined) return [];
+		var childrenNodes = node.nodes;
+		node.nodes.forEach(function(n){
+			childrenNodes = childrenNodes.concat(_getChildren(n));
+		});
+		return childrenNodes;
+	};
+
+	function _getparents(node){
+		if (node.parentId === undefined) return [];
+		var parentNodes = [];
+		var i =0;
+		for(var pnode = $("#treeremote").treeview('getNode',node.parentId) ;pnode.nodeId !== undefined;pnode = $("#treeremote").treeview('getNode',pnode.parentId))
+		{
+			parentNodes = parentNodes.concat(pnode);
+		};
+		return parentNodes;
+	};
+	function _getparentsLocal(node){
+		if (node.parentId === undefined) return [];
+		var parentNodes = [];
+		var i =0;
+		for(var pnode = $("#treelocal").treeview('getNode',node.parentId) ;pnode.nodeId !== undefined;pnode = $("#treelocal").treeview('getNode',pnode.parentId))
+		{
+			parentNodes = parentNodes.concat(pnode);
+		};
+		return parentNodes;
+	};
+
+	$(document).ready(function(){
+		$.ajaxSetup ({     
+
+			cache: false
+		});
+
+		$('#treeremote').treeview({
+			color: "#428bca",
+			expandIcon: 'glyphicon glyphicon-chevron-right',
+			collapseIcon: 'glyphicon glyphicon-chevron-down',
+			nodeIcon: 'glyphicon glyphicon-bookmark',		
+			data: getRemoteData(),
+			showIcon: false,
+			showCheckbox: true,
+			levels:1,
+			showTags:false,
+			onNodeChecked:function(event,node){
+				var childrenNodes = _getChildren(node);
+				var parentNodes = _getparents(node);
+				$(childrenNodes).each(function(){
+					$("#treeremote").treeview('checkNode',[this.nodeId,{silent:true}]);;
+				});
+				$(parentNodes).each(function(){
+					var allChildIsChecked = 1;
+					$(this.nodes).each(function(){
+						if(this.state.checked===false)
+						{
+							allChildIsChecked=0;
+							return false;
+						};
+					});		
+					if(allChildIsChecked === 1)
+					{
+						$("#treeremote").treeview('checkNode',[this.nodeId,{silent:true}]);;
+					}	
+				});				
+			},
+			onNodeUnchecked:function(event,node){
+				var childrenNodes = _getChildren(node);
+				var parentNodes = _getparents(node);
+				$(childrenNodes).each(function(){
+					$("#treeremote").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+				});
+				$(parentNodes).each(function(){
+					$("#treeremote").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+				});
+			},
+		});	
+
+        // Check/uncheck all
+        $('#btn-check-all').on('click', function (e) {
+        	$('#treelocal').treeview('checkAll');
+        });
+
+        $('#applyFilter').on('click', function (e) {
+            var posList = [];
+            $("[name=items]:checked").each(function(){
+                posList.push(this.id);
+            });
+            // console.log(posList[0]);
+            $.post("/system/filterRemote/",{"posList":posList},
+                function(data){
+                    $('#treeremote').treeview({
+                        color: "#428bca",
+                        expandIcon: 'glyphicon glyphicon-chevron-right',
+                        collapseIcon: 'glyphicon glyphicon-chevron-down',
+                        nodeIcon: 'glyphicon glyphicon-bookmark',
+                        data:data,
+                        showIcon: false,
+                        showCheckbox: true, 
+                        levels:1,
+                        showTags:false,
+                        onNodeChecked:function(event,node){
+                            var childrenNodes = _getChildren(node);
+                            var parentNodes = _getparentsLocal(node);
+                            $(childrenNodes).each(function(){
+                                $("#treeremote").treeview('checkNode',[this.nodeId,{silent:true}]);;
+                            });
+                            $(parentNodes).each(function(){
+                                var allChildIsChecked = 1;
+                                $(this.nodes).each(function(){
+                                    if(this.state.checked===false)
+                                    {
+                                        allChildIsChecked=0;
+                                        return false;
+                                    };
+                                });     
+                                if(allChildIsChecked === 1)
+                                {
+                                    $("#treeremote").treeview('checkNode',[this.nodeId,{silent:true}]);;
+                                }   
+                            });             
+                        },
+                        onNodeUnchecked:function(event,node){
+                            var childrenNodes = _getChildren(node);
+                            var parentNodes = _getparentsLocal(node);
+                            $(childrenNodes).each(function(){
+                                $("#treeremote").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+                            });
+                            $(parentNodes).each(function(){
+                                $("#treeremote").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+                            });
+                        },                          
+                    });  
+                });
+        });
+
+        $('#getchecked').on('click', function (e) {
+        	var checkedList = $('#treeremote').treeview('getChecked');
+        	var newList = [];
+        	var listLength = checkedList.length;
+        	for (var i =listLength-1;i>=0;i--)
+        	{
+        		if(checkedList[i].nodes===undefined)
+        			newList.push(checkedList[i].tags[0]);
+        	}
+        	var curUser = $("#curUser").val();
+        	if(curUser==="0")
+        	{
+                var code = " <div class='alert alert-warning' role='alert' > 请先选择用户 </div>";
+                document.getElementById("msglayer").innerHTML=code;
+                return false;
+            };
+            $.post("/system/configJQAjax/",{"newList":newList,"curUser":curUser},
+              function(data){
+                if(data=="error")
+                {
+                    var code = " <div class='alert alert-warning' role='alert' > 添加失败 </div>";
+                    document.getElementById("msglayer").innerHTML=code;
+                    return;
+                }
+                $('#treelocal').treeview({
+                    color: "#428bca",
+                    expandIcon: 'glyphicon glyphicon-chevron-right',
+                    collapseIcon: 'glyphicon glyphicon-chevron-down',
+                    nodeIcon: 'glyphicon glyphicon-bookmark',
+                    data:data,
+                    showIcon: false,
+                    showCheckbox: true,	
+                    levels:1,
+                    showTags:false,
+                    onNodeChecked:function(event,node){
+                     var childrenNodes = _getChildren(node);
+                     var parentNodes = _getparentsLocal(node);
+                     $(childrenNodes).each(function(){
+                      $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+                  });
+                     $(parentNodes).each(function(){
+                      var allChildIsChecked = 1;
+                      $(this.nodes).each(function(){
+                       if(this.state.checked===false)
+                       {
+                        allChildIsChecked=0;
+                        return false;
+                    };
+                });		
+                      if(allChildIsChecked === 1)
+                      {
+                       $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+                   }	
+               });				
+                 },
+                 onNodeUnchecked:function(event,node){
+                     var childrenNodes = _getChildren(node);
+                     var parentNodes = _getparentsLocal(node);
+                     $(childrenNodes).each(function(){
+                      $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+                  });
+                     $(parentNodes).each(function(){
+                      $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+                  });
+                 },        					
+             });  
+                var code = " <div class='alert alert-success' role='alert' > 添加成功 </div>";
+                document.getElementById("msglayer").innerHTML=code;                    
+            });			
+        });
+        $('#btn-uncheck-all').on('click', function (e) {
+        	$('#treelocal').treeview('uncheckAll', { silent: $('#chk-check-silent').is(':checked') });
+        });
+
+        $("#sip").bind('keypress',function(event){
+            if(event.keyCode!="13"){
+                return;
+            }
+            var curUser = $("#curUser").children('option:selected').val();
+            var sip = $("#sip").val();
+            if(curUser !== "0")
+            {
+                $.post("/system/configLocalAjax/",{"curUser":curUser,"sip":sip},
+                    function(data){
+
+                        $('#treelocal').treeview({
+                            color: "#428bca",
+                            expandIcon: 'glyphicon glyphicon-chevron-right',
+                            collapseIcon: 'glyphicon glyphicon-chevron-down',
+                            nodeIcon: 'glyphicon glyphicon-bookmark',
+                            data: data,
+                            showIcon: false,
+                            showCheckbox: true, 
+                            levels:1,
+                            showTags:false,
+                            onNodeChecked:function(event,node){
+                                var childrenNodes = _getChildren(node);
+                                var parentNodes = _getparentsLocal(node);
+                                $(childrenNodes).each(function(){
+                                    $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+                                });
+                                $(parentNodes).each(function(){
+                                    var allChildIsChecked = 1;
+                                    $(this.nodes).each(function(){
+                                        if(this.state.checked===false)
+                                        {
+                                            allChildIsChecked=0;
+                                            return false;
+                                        };
+                                    });     
+                                    if(allChildIsChecked === 1)
+                                    {
+                                        $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+                                    }   
+                                });             
+                            },
+                            onNodeUnchecked:function(event,node){
+                                var childrenNodes = _getChildren(node);
+                                var parentNodes = _getparentsLocal(node);
+                                $(childrenNodes).each(function(){
+                                    $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+                                });
+                                $(parentNodes).each(function(){
+                                    $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+                                });
+                            },                          
+                        });
+                    });                 
+            }
+            else
+            {
+                $('#treelocal').treeview({
+                    color: "#428bca",
+                    expandIcon: 'glyphicon glyphicon-chevron-right',
+                    collapseIcon: 'glyphicon glyphicon-chevron-down',
+                    nodeIcon: 'glyphicon glyphicon-bookmark',
+
+                    showIcon: false,
+                    showCheckbox: true, 
+                    levels:1,
+                    showTags:false,
+                });             
+            }            
+        });
+
+
+
+        $("#curUser").change(function(){
+        	var curUser = $(this).children('option:selected').val();
+            var sip = $("#sip").val();
+
+            if(curUser !== "0")
+            {
+              $.post("/system/configLocalAjax/",{"curUser":curUser,"sip":sip},
+               function(data){
+
+                $('#treelocal').treeview({
+                 color: "#428bca",
+                 expandIcon: 'glyphicon glyphicon-chevron-right',
+                 collapseIcon: 'glyphicon glyphicon-chevron-down',
+                 nodeIcon: 'glyphicon glyphicon-bookmark',
+                 data: data,
+                 showIcon: false,
+                 showCheckbox: true,	
+                 levels:1,
+                 showTags:false,
+                 onNodeChecked:function(event,node){
+                  var childrenNodes = _getChildren(node);
+                  var parentNodes = _getparentsLocal(node);
+                  $(childrenNodes).each(function(){
+                   $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+               });
+                  $(parentNodes).each(function(){
+                   var allChildIsChecked = 1;
+                   $(this.nodes).each(function(){
+                    if(this.state.checked===false)
+                    {
+                     allChildIsChecked=0;
+                     return false;
+                 };
+             });		
+                   if(allChildIsChecked === 1)
+                   {
+                    $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+                }	
+            });				
+              },
+              onNodeUnchecked:function(event,node){
+                  var childrenNodes = _getChildren(node);
+                  var parentNodes = _getparentsLocal(node);
+                  $(childrenNodes).each(function(){
+                   $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+               });
+                  $(parentNodes).each(function(){
+                   $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+               });
+              },        					
+          });
+            });	        		
+          }
+          else
+          {
+              $('#treelocal').treeview({
+               color: "#428bca",
+               expandIcon: 'glyphicon glyphicon-chevron-right',
+               collapseIcon: 'glyphicon glyphicon-chevron-down',
+               nodeIcon: 'glyphicon glyphicon-bookmark',
+
+               showIcon: false,
+               showCheckbox: true,	
+               levels:1,
+               showTags:false,
+           });        		
+          }
+      });
+
+        $('#delete').on('click', function (e) {
+        	var curUser = $("#curUser").val();
+        	if(curUser==="0")
+        	{
+                var code = " <div class='alert alert-warning' role='alert' > 请先选择用户 </div>";
+                document.getElementById("msglayer").innerHTML=code;
+                return false;
+            };
+            var checkedList = $('#treelocal').treeview('getChecked');
+            var newList = [];
+            var listLength = checkedList.length;
+            for (var i =listLength-1;i>=0;i--)
+            {
+              if(checkedList[i].nodes===undefined)
+               newList.push(checkedList[i].tags[0]);
+       }
+       $.post("/system/configJQAjaxDelete/",{"newList":newList,"curUser":curUser},
+          function(data){
+            if(data=="error")
+            {
+                var code = " <div class='alert alert-warning' role='alert' > 删除失败 </div>";
+                document.getElementById("msglayer").innerHTML=code;                        
+                return;
+            }
+
+            $('#treelocal').treeview({
+                color: "#428bca",
+                expandIcon: 'glyphicon glyphicon-chevron-right',
+                collapseIcon: 'glyphicon glyphicon-chevron-down',
+                nodeIcon: 'glyphicon glyphicon-bookmark',
+                data:data,
+                showIcon: false,
+                showCheckbox: true,	
+                levels:1,
+                showTags:false,
+                onNodeChecked:function(event,node){
+                 var childrenNodes = _getChildren(node);
+                 var parentNodes = _getparentsLocal(node);
+                 $(childrenNodes).each(function(){
+                  $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+              });
+                 $(parentNodes).each(function(){
+                  var allChildIsChecked = 1;
+                  $(this.nodes).each(function(){
+                   if(this.state.checked===false)
+                   {
+                    allChildIsChecked=0;
+                    return false;
+                };
+            });		
+                  if(allChildIsChecked === 1)
+                  {
+                   $("#treelocal").treeview('checkNode',[this.nodeId,{silent:true}]);;
+               }	
+           });				
+             },
+             onNodeUnchecked:function(event,node){
+                 var childrenNodes = _getChildren(node);
+                 var parentNodes = _getparentsLocal(node);
+                 $(childrenNodes).each(function(){
+                  $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+              });
+                 $(parentNodes).each(function(){
+                  $("#treelocal").treeview('uncheckNode',[this.nodeId,{silent:true}]);;
+              });
+             },        					
+         }); 
+            var code = " <div class='alert alert-success' role='alert' > 删除成功 </div>";
+            document.getElementById("msglayer").innerHTML=code;                        
+
+        });	        	        	
+   });
+
+        $("#syncDB").on('click', function (e) {
+        	$.post("/system/syncDB/",
+        		function(data){
+        			if(data=="同步成功")
+                    {
+                        var code = " <div class='alert alert-success' role='alert' > 同步成功 </div>";
+                        document.getElementById("msglayer").innerHTML=code;                           
+                    }
+                    else
+                    {
+                        var code = " <div class='alert alert-danger' role='alert' > 同步失败 </div>";
+                        document.getElementById("msglayer").innerHTML=code;                        
+                    }
+
+                });
+        });
+        $('#notify').on('click', function (e) {
+            var curUser = $("#curUser").val();
+            if(curUser==="0")
+            {
+                var code = " <div class='alert alert-warning' role='alert' > 请先选择用户 </div>";
+                document.getElementById("msglayer").innerHTML=code;
+                return false;
+            };
+            // console.log(curUser);
+            $.post("/system/notifyUserAjax/",{"curUser":curUser},
+                function(data){
+                    if(data=="通知用户成功")
+                    {
+                        var code = " <div class='alert alert-success' role='alert' > 通知用户成功 </div>";
+                        document.getElementById("msglayer").innerHTML=code;                            
+                    }
+                    else
+                    {
+                        var code = " <div class='alert alert-danger' role='alert' > 发生错误！ </div>";
+                        document.getElementById("msglayer").innerHTML=code;                           
+                    }
+                });    
+        });
+
+    });
+
+
+
+
+</script>
+{% endif %}
+
+{%endblock%}
+

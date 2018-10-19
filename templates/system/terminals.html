@@ -1,0 +1,150 @@
+{% extends "system/base.html" %}
+
+{% block title %}
+<title>终端配置</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">终端列表</h3>
+		</div>
+		<div class="panel-body">
+			<div class="list-op" id="list-op">
+				<a href="/system/addTerminal/" class="btn btn-default btn-sm" role="button">
+					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+				</a>				
+			</div>
+			{% if msg %}
+			{% ifequal msg "success" %}
+			<div class="margin" style="margin:14px 0px 0px 0px;">
+				<div class="alert alert-success" role="alert" >{{msgContent}}</div>
+			</div>
+			{% else %}
+			<div class="margin" style="margin:14px 0px 0px 0px;">
+				<div class="alert alert-danger" role="alert" >{{msgContent}}</div>
+			</div>
+			{% endifequal %}
+			{% endif %}			
+		</div>
+
+		<table class="table table-bordered table-hover">
+			<thead>
+				<tr class="success">
+		
+					<th>注册ID</th>
+					<th>名称</th>
+					<th>地址</th>
+					<th>类型</th>
+					<th>用户ID</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				
+				{% for item in terminals %}
+				<tr>
+					<td>
+						{{item.registerid}}
+					</td>
+					<td>
+						{{item.username}}
+					</td>
+					<td>
+						{{item.location}}
+					</td>
+					<td>
+						{% ifequal item.clienttype 0 %}
+						内网终端
+						{% else %}
+						外网终端
+						{% endifequal %}						
+					</td>
+					<td>
+						{{item.userid}}
+					</td>
+					<td width="20%">
+						<a href="/system/editTerminal/{{item.pk}}" class="btn btn-default btn-sm" role="button">
+							<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>修改
+						</a>
+						<a href="/system/deleteTerminal/{{item.pk}}" class="btn btn-default btn-sm" role="button">
+							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+						</a>						
+					</td>														
+				</tr>											
+				{% endfor %}
+
+				
+			</tbody>
+		</table>
+		<div class="panel-footer">注：地址名唯一</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	// $(document).ready(function(){
+	// 	function initCheckbox()
+	// 	{
+	// 		var thr = $('table thead tr');
+	// 		var checkAllTh = $('<th> <input type="checkbox" id="checkAll" name="checkAll" /></th>');
+	// 		thr.prepend(checkAllTh);
+
+	// 		var checkAll = thr.find('input');
+	// 		checkAll.click(function(event){
+	// 			tbr.find('input').prop('checked',$(this).prop('checked'));
+	// 			if($(this).prop('checked'))
+	// 				tbr.find('input').parent().parent().addClass('warning');
+	// 			else
+	// 				tbr.find('input').parent().parent().removeClass('warning');
+	// 			event.stopPropagation();
+	// 		});
+
+	// 		checkAllTh.click(function(){
+	// 			$(this).find('input').click();
+	// 		});
+
+	// 		var tbr = $('table tbody tr');
+	// 		var checkItemTd = $('<td> <input type="checkbox" name="checkItem" /></td>');
+
+	// 		tbr.prepend(checkItemTd);
+
+	// 		tbr.find('input').click(function(event){
+	// 			$(this).parent().parent().toggleClass('warning');
+	// 			checkAll.prop('checked',tbr.find('input:checked').length==tbr.length ? true:false);
+	// 			event.stopPropagation();
+	// 		});
+
+	// 		tbr.click(function(){
+	// 			$(this).find('input').click();
+	// 		})
+	// 	};
+
+	// 	$('#delete').click(function(){
+	// 		var tby = $('table tbody tr');
+	// 		var terminalsToBeDeleted= new Array();
+
+	// 		$('tbody tr').each(function(){	
+	// 			var mm = $(this).children()[0];
+	// 			if($(mm).find('input:checked').length>0)
+	// 			{
+	// 				var nn = $(mm).next();
+	// 				terminalsToBeDeleted.push($(nn)[0].innerText);
+	// 			}
+	// 		});
+	// 		console.log(terminalsToBeDeleted);
+	// 	});
+
+	// 	initCheckbox();
+	// });
+
+
+
+
+</script>
+
+{%endblock%}
+

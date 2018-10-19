@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">视频转发设备</h1>
+{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+<p>{% trans "Thanks for spending some quality time with the Web site today." %}</p>
+
+<p><a href="/login/">{% trans 'Log in again' %}</a></p>
+
+{% endblock %}

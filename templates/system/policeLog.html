@@ -1,0 +1,438 @@
+{% extends "system/base.html" %}
+
+{% block title %}
+<title>日志管理</title>
+{% endblock %}
+
+{% block extrastatic %}
+<!-- <link href="/static/jeui/css/jeui.css" rel="stylesheet" type="text/css"> -->
+<script type="text/javascript" src="/static/jeui/js/jedate/jquery.jedate.js"></script>
+<link type="text/css" rel="stylesheet" href="/static/jeui/js/jedate/jedate.css">
+{% endblock %}
+
+
+{% block content %}
+
+
+
+<div class="container">
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">日志管理</h3>
+		</div>
+		<div class="panel-body">
+
+
+
+
+
+
+
+
+
+
+
+			<div class="well" style="min-height: 300px;">
+			<form action="/system/downloadPoliceLog/" method="post">
+				<div class="row">
+					<div class="col-md-4">
+						<div class="form-group">
+							<label for="searchtype">查询类型*:</label> 
+							<select class="form-control" for="id_clienttype" id="searchtype" name="searchtype">
+								<option value="">全部</option>
+								<option value="0">实时调阅</option>
+								<option value="1">录像回看</option>
+								<option value="2">录像下载</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group">
+							<label for="depart">支行:</label> 
+							<select class="form-control" for="depart" id="depart" name="searchdept">
+								<option value="">全部</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label for="group">网点:</label> 
+							<select class="form-control" for="group" id="group" name="searchgroup">
+								<option value="">全部</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label for="device">设备:</label> 
+							<select class="form-control" for="device" id="device" name="searchdevice">
+								<option value="">全部</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label for="channel">通道:</label> 
+							<select class="form-control" for="channel" id="channel" name="searchchannel">
+								<option value="">全部</option>
+							</select>
+						</div>
+					</div>											
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<span class="wstxt">调阅时间：</span><input type="text" class="workinput wicon mr25" id="callstart" name="callstart" readonly>
+						<span class="wstxt">至</span><input type="text" class="workinput wicon mr25" id="callend" name="callend" readonly>
+					</div>
+
+
+
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<span class="wstxt">视频时间：</span><input type="text" class="workinput wicon mr25" id="videostart" name="videostart" readonly>
+						<span class="wstxt">至</span><input type="text" class="workinput wicon mr25" id="videoend" name="videoend" readonly>
+					</div>
+
+
+				</div>
+			    <div class="col-sm-offset-10 col-sm-2">
+      				<a id="search" class="btn btn-default">查询</a>
+    			</div>
+
+			</div>
+			
+			{% ifnotequal user.groups.all.0.name 'zby' %}
+			<a  href="/system/clearPoliceLog/" class="btn btn-danger" >清空公安日志</a>
+			{% endifnotequal %}
+			<button  class="btn btn-default" type="submit">下载</button>
+			<!-- <a  href="/system/downloadPoliceLog/" class="btn btn-danger" >下载公安日志</a> -->
+			</form>
+
+			
+			<form id="action-selecter" action="{{request.path}}" method="post">
+				<div id="ajax_table_result">
+					<table class="table table-bordered">
+
+						<thead>
+							<tr>
+								<th>调阅类型</th>
+								<th>调阅时间</th>
+								<th>视频时间</th>
+								<th>部位(支行-网点-设备-通道)</th>
+								<th>动作</th>
+							</tr>
+						</thead>
+
+						<tbody>
+							{% for item in logs %}
+							<tr>
+								<td> {{item.operatetype}}</td>
+								<td> {{item.calltime}}</td>
+								<td> {{item.videotime}}</td>
+								<td> {{item.deptname}}-{{item.groupname}}-{{item.ename}}-{{item.channelname}}</td>
+								<td> {{item.logevent}}</td>
+							</tr>
+							{% endfor %}
+
+						</tbody>
+
+					</table>	
+				</div>
+
+			</form>
+		</div>
+		<div class="pagination">
+			<span class="step-links">
+				{% if logs.has_previous %}
+				<a id="prev" href="?page={{ logs.previous_page_number }}">previous</a>
+				{% endif %}
+				<span class="current">
+					Page {{ logs.number }} of {{ logs.paginator.num_pages }}.
+				</span>
+				{% if logs.has_next %}
+				<a id="next" href="?page={{ logs.next_page_number }}">next</a>
+				{% endif %}
+			</span>
+		</div>	
+
+	</div>
+
+</div>
+
+<script type="text/javascript">
+
+	function ajax_get_update(){
+		$.get(url,function(results){
+			var table = $("table",results);
+			var span = $("span.step-links",results);
+			$('#ajax_table_result').html(table);
+			$('span.step-links').html(span);
+		});
+	};
+
+	$(document).ready(function(){
+		$('span.step-links #prev').click(function(e){
+			e.preventDefault();
+			url = ($('span.step-links #prev')[0].href);
+			ajax_get_update();
+		});
+		$('span.step-links #next').click(function(e){
+			e.preventDefault();
+			url = ($('span.step-links #next')[0].href);
+			ajax_get_update();
+		});
+	});
+
+
+	$(document).ajaxStop(function(){
+		$('.step-links #prev').click(function(e){
+			e.preventDefault();
+			url = ($('.step-links #prev')[0].href);
+			ajax_get_update();
+		});
+		$('.step-links #next').click(function(e){
+			e.preventDefault();
+			url = ($('.step-links #next')[0].href);
+			ajax_get_update();
+		});	
+	});
+
+</script>
+
+<script>
+
+
+var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",")
+hasOwn = ({}).hasOwnProperty;
+for(var i in {toString : 1})
+{
+	DONT_ENUM = false;
+}
+Object.keys = Object.keys || function(obj){
+	var result = [];
+	for(var key in obj)
+	{
+		if(hasOwn.call(obj,key)){
+			result.push(key);
+		}
+		if(DONT_ENUM && obj)
+		{
+			for(var i=0;key=DONT_ENUM[i++];)
+			{
+				if(hasOwn.call(obj,key))
+				{
+					result.push(key);
+				}
+			}
+		}
+	}
+	return result;
+}
+
+
+	var start = {
+		format: 'YYYY-MM-DD hh:mm:ss',
+		skinCell:"jedateblue",  
+    // minDate: $.nowDate(0), //设定最小日期为当前日期
+    isinitVal:false,
+    festival:true,
+    ishmsVal:false,
+    maxDate: '2099-06-30 23:59:59', //最大日期
+    choosefun: function(elem,datas){
+        end.minDate = datas; //开始日选好后，重置结束日的最小日期
+    }
+};
+var end = {
+	format: 'YYYY-MM-DD hh:mm:ss',
+	skinCell:"jedateblue",  
+    // minDate: $.nowDate(0), //设定最小日期为当前日期
+    festival:true,
+    maxDate: '2099-06-16 23:59:59', //最大日期
+    choosefun: function(elem,datas){
+        start.maxDate = datas; //将结束日的初始值设定为开始日的最大日期
+    }
+};
+$('#callstart').jeDate(start);
+$('#callend').jeDate(end);
+$('#videostart').jeDate(start);
+$('#videoend').jeDate(end);
+
+
+
+$('#search').on('click', function (e) {
+	var type = $("#searchtype").val();
+
+	var dept = $("#depart").val();
+	var group = $("#group").val();
+	var device = $("#device").val();
+	var channel = $("#channel").val();
+
+
+	var callstart = $("#callstart").val();
+	var callend = $("#callend").val();
+	var videostart = $("#videostart").val();
+	var videoend = $("#videoend").val();
+
+	$.post("/system/policeLog/",{"type":type,"dept":dept,"group":group,"device":device,"channel":channel,"callstart":callstart,"callend":callend,"videostart":videostart,"videoend":videoend},
+		function(results){
+
+			var table = $("table",results);
+			var span = $("span.step-links",results);
+			$('#ajax_table_result').html(table);
+			$('span.step-links').html(span);			
+		});
+});
+
+
+$('#download').on('click', function (e) {
+	var type = $("#searchtype").val();
+
+	var dept = $("#depart").val();
+	var group = $("#group").val();
+	var device = $("#device").val();
+	var channel = $("#channel").val();
+
+
+	var callstart = $("#callstart").val();
+	var callend = $("#callend").val();
+	var videostart = $("#videostart").val();
+	var videoend = $("#videoend").val();
+
+	$.post("/system/downloadPoliceLog/",{"type":type,"dept":dept,"group":group,"device":device,"channel":channel,"callstart":callstart,"callend":callend,"videostart":videostart,"videoend":videoend},
+		function(results){
+			// console.log(results);			
+		});
+});
+
+
+function removeOptions(selectbox)
+{
+	var i;
+	for(i=selectbox.options.length-1;i>=0;i--)
+	{
+		selectbox.remove(i);
+	}
+	var opt = document.createElement('option');
+	opt.value="";
+	opt.innerHTML = "全部";
+	selectbox.appendChild(opt);	
+}
+
+var globalData;
+
+$("#depart").change(function(){
+	var curDept = $(this).children('option:selected').val();
+	var group = document.getElementById('group');
+	var device = document.getElementById('device');
+	var channel = document.getElementById('channel');
+	removeOptions(group);
+	removeOptions(device);
+	removeOptions(channel);
+	if(!curDept)
+	{
+		return;
+	}
+	var curGroupListInDept = globalData[curDept];
+	var keys = Object.keys(curGroupListInDept);
+	var i;
+	for(i=0;i<keys.length;i++)
+	{
+		var opt = document.createElement('option');
+		opt.value=keys[i];
+		opt.innerHTML = keys[i];
+		group.appendChild(opt);			
+	}	
+});
+
+$("#group").change(function(){
+	var curGroup = $(this).children('option:selected').val();
+	var device = document.getElementById('device');
+	var channel = document.getElementById('channel');
+	removeOptions(device);
+	removeOptions(channel);
+
+	if(!curGroup)
+	{
+		return;
+	}
+
+	var parent = $("#depart").children('option:selected').val();
+	var parentDict = globalData[parent];
+
+
+	var curDeviceListInGroup = parentDict[curGroup];
+	// console.log(curDeviceListInGroup);
+	var keys = Object.keys(curDeviceListInGroup);
+	var i;
+	for(i=0;i<keys.length;i++)
+	{
+		var opt = document.createElement('option');
+		opt.value=keys[i];
+		opt.innerHTML = keys[i];
+		device.appendChild(opt);			
+	}	
+});
+
+$("#device").change(function(){
+	var curDevice = $(this).children('option:selected').val();
+	var group = document.getElementById('group');
+	var dept = document.getElementById('depart');
+	var channel = document.getElementById('channel');
+	removeOptions(channel);
+
+	var deptValue = $("#depart").children('option:selected').val();
+	var groupValue = $("#group").children('option:selected').val();
+
+	if(!curDevice)
+	{
+		return;
+	}
+	var curChannelListInDevice = globalData[deptValue][groupValue][curDevice];
+	// console.log(curChannelListInDevice);
+	var keys = Object.keys(curChannelListInDevice);
+	var i;
+	for(i=0;i<keys.length;i++)
+	{
+		var opt = document.createElement('option');
+		opt.value=keys[i];
+		opt.innerHTML = keys[i];
+		channel.appendChild(opt);			
+	}	
+});
+
+
+function getICBCTreeFromLogs(){
+	$.get("/system/getICBCTreeFromLogs/",function(results){
+		data = JSON.parse(results);
+		globalData = data;
+		var keys = Object.keys(data);
+		// var keys = "";
+
+
+		var select = document.getElementById('depart');
+		removeOptions(select);
+		var i;
+		for(i=0;i<keys.length;i++)
+		{
+			var opt = document.createElement('option');
+			opt.value=keys[i];
+			opt.innerHTML = keys[i];
+			select.appendChild(opt);			
+		}
+	});
+};
+getICBCTreeFromLogs();
+
+</script>
+
+{%endblock%}
+

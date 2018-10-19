@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- The above 2 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Note there is no responsive meta tag here -->
+
+  <link rel="icon" href="../../favicon.ico">
+  {% block title %}
+  <title>视频转换设备主页</title>
+  {% endblock %}
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/css/non-responsive.css" rel="stylesheet">
+
+  <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+  <!-- <script src="/static/js/ie8-responsive-file-warning.js"></script> -->
+  <!-- <script src="/static/js/ie-emulation-modes-warning.js"></script> -->
+
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+
+  <script src="/static/js/jquery.js"></script>
+
+  <link href="/static/js/jquery.msgbox.css" rel="stylesheet" type="text/css" />
+  
+  <script type="text/javascript" src="/static/js/js-pushlet-client.js"></script>
+  <script type="text/javascript" src="/static/assets/api.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.dragndrop.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.msgbox.js"></script>
+  <script type="text/javascript" src="/static/js/main.js"></script>
+
+  <script type="text/javascript">
+
+
+
+  </script>
+  <!-- <script>window.jQuery || document.write('<script src="/static/js/jquery.js"><\/script>')</script> -->
+  <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+  <link href="/static/treeview/bootstrap-treeview.min.css" rel="stylesheet">
+  <script src="/static/treeview/bootstrap-treeview.min.js"></script>
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+  <script src="/static/js/respond.min.js"></script>
+  <script src="/static/js/html5shiv.js"></script>
+  <![endif]-->
+
+  {% block extrastatic %}
+
+  {% endblock %}
+
+</head>
+
+<body OnLoad="javascript:init('{{dvrip}}','{{devicechannelindex}}');">
+  {% block bar %}
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- The mobile navbar-toggle button can be safely removed since you do not need it in a non-responsive implementation -->
+        <a class="navbar-brand" href="/home/">视频转换设备</a>
+      </div>
+      <!-- Note that the .navbar-collapse and .collapse classes have been removed from the #navbar -->
+      <div id="navbar">
+        <ul class="nav navbar-nav">
+          <li ><a href="/home/">设备状态</a></li>
+          <li><a href="/system/configJQ/">鉴权管理</a></li>
+          {% ifnotequal user.groups.all.0.name 'zby' %}
+          <li><a href="/system/terminals/">终端管理</a></li>
+          {% endifnotequal %}
+          {% ifnotequal user.groups.all.0.name 'zby' %}
+          <li><a href="/system/addressMapping/">映射管理</a></li>
+          {% endifnotequal %}
+          {% ifnotequal user.groups.all.0.name 'zby' %}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">服务参数配置 <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/system/configparams/">媒体服务参数</a></li>
+              <li><a href="/system/configmediamonitorparams/">媒体监控参数</a></li>
+              <li><a href="/system/configserverparams/">协议参数</a></li>
+            </ul>
+          </li> 
+          {% endifnotequal %}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">日志查看 <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/system/userLog/">操作员日志</a></li>
+              <li><a href="/system/policeLog/">公安调阅日志</a></li>
+              <li><a href="/system/downloadSystemLog/">下载日志</a></li>
+            </ul>
+          </li>        
+          {% ifnotequal user.groups.all.0.name 'zby' %}                   
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">配置 <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/system/servers">服务器参数配置</a></li>
+              <li><a href="/system/configNET/">服务器网络参数配置</a></li>
+              <li><a href="/system/configRemoteDatabase/">远端数据库配置</a></li>
+              <li><a href="/system/accounts/">账号管理</a></li>
+              <li><a href="/system/sipInfo/">sip参数管理</a></li>
+              
+              <li><a href="/zbyAccounts/">值班员账号管理</a></li>
+
+              <li role="separator" class="divider"></li>
+              <li class="dropdown-header">设备操作</li>
+              <!-- <li><a href="/system/shutdown/">恢复出厂</a></li> -->
+              <li><a href="/system/update/">固件升级</a></li>
+              <li><a href="#" onclick="restartService()">重启服务</a></li>
+              <li><a href="/system/restart/">重启设备</a></li>
+              <li><a href="/system/shutdown/">关闭设备</a></li>
+
+              <li role="separator" class="divider"></li>
+              <li><a href="/about/">关于</a></li>              
+            </ul>
+          </li>
+          {% endifnotequal %}
+          <li><a href="/password_change/">修改密码</a></li>
+          <li><a href="/logout/">登出</a></li>
+
+        </ul>
+
+      </div><!--/.nav-collapse -->
+    </div>
+  </nav>
+  {% endblock %}
+  {% block content %}
+  <div class="container">
+
+    <div class="page-header">
+      <h1>服务器当前状态</h1>
+      <p class="lead"></p>
+    </div>
+
+    <div class="well" style="min-height: 400px;">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 30%">项</th>
+              <th>值</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>当前IP：</td>
+              <td>{{localIP}}</td>
+
+            </tr>
+            <tr>
+              <td>系统时间:</td>
+              <td>{{time}}</td>
+
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+      <hr>
+
+
+
+      <object classid="CLSID:76A64158-CB41-11D1-8B02-00600806D9B6" id="locator" style="display:none;visibility:hidden"></object>
+      <object classid="CLSID:75718C9A-F029-11d1-A1AC-00C04FB6C223" id="foo" style="display:none;visibility:hidden"></object>
+
+      <hr>
+      <div style="width:20;height:50;display: block;">
+      <OBJECT ID="vlcplayer" CLASSID="CLSID:E6963FEA-95F6-4AA7-8C2C-44D5FB979B9A" width="600" height="450" align="500">
+      </OBJECT>
+      </div>
+      <hr>
+
+
+
+
+
+
+      <div class="table-responsive">
+        <p>被调阅通道列表</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 30%">支行</th>
+              <th>网点</th>
+              <th>设备</th>
+              <th>通道</th>
+              <th>编辑</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in objectList %}
+            <tr>
+              <td>{{item.0.deptname}}</td>
+              <td>{{item.0.groupname}}</td>
+              <td>{{item.0.ename}}</td>
+              <td>{{item.0.channelname}}</td>
+              <td>
+                <a class="btn btn-default" href="/function/viewVideoWithRefresh/{{item.0.deviceip}}/{{item.0.devicechannelindex}}/">刷新预览视频</a>
+                <a class="btn btn-default" id="closeViewVideo" onclick="closeViewVideoFun('{{item.0.deviceip}}','{{item.0.devicechannelindex}}')">关闭视频预览</a>
+                <a class="btn btn-default" href="/system/closechannel/{{item.1}}/{{item.2}}/">关闭视频</a></td>
+              </td>
+              </tr>
+
+
+              {% endfor %}
+            </tbody>
+          </table>
+          
+        </div>   
+      <div class="table-responsive">
+        <p>当前正在下载通道列表</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 30%">支行</th>
+              <th>网点</th>
+              <th>设备</th>
+              <th>通道</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in dlobjects %}
+            <tr>
+              <td>{{item.0.deptname}}</td>
+              <td>{{item.0.groupname}}</td>
+              <td>{{item.0.ename}}</td>
+              <td>{{item.0.channelname}}</td>
+
+              </tr>
+
+
+              {% endfor %}
+            </tbody>
+          </table>
+
+        </div>  
+
+      <div class="table-responsive">
+        <p>当前正在回放通道列表</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 30%">支行</th>
+              <th>网点</th>
+              <th>设备</th>
+              <th>通道</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in pbobjects %}
+            <tr>
+              <td>{{item.0.deptname}}</td>
+              <td>{{item.0.groupname}}</td>
+              <td>{{item.0.ename}}</td>
+              <td>{{item.0.channelname}}</td>
+
+              </tr>
+
+
+              {% endfor %}
+            </tbody>
+          </table>
+
+        </div>                  
+
+
+        
+        <!-- Embed pushlet in page -->
+        <script type="text/javascript">p_embed()</script>
+        
+        <script language="javascript">
+          
+          function init(dvrip,devicechannelindex) {
+            if(vlcplayer.url==undefined)
+          {
+            $.msgbox("您的浏览器没有安装系统所必须的ActiveX控件,<a href='/static/PMPPlayerX_setup.exe' target='_blank'>点击下载</a>,安装完毕后请重新启动IE浏览器!");
+          }
+            
+          //pushlet添加
+          initDHTML();
+          p_join_listen('/comet/play_notify');               
+          $.post("/function/viewVideo/",{"dvrip":dvrip,"devicechannelindex":devicechannelindex},
+            function(results){
+              onData(results,"stop");
+              onData(results,"start");
+            });  
+    }
+
+    //pushlet添加
+    // onData method called by pushlet frame
+    function onData(userip,action) {
+      var play_notify_action = action;
+      var play_notify_ip = userip;
+      var play_notify_port = "6000";
+      var sIPAddr = play_notify_ip;
+
+      // var play_notify_action = pushletEvent.get('play_notify_action');
+      // var play_notify_ip = pushletEvent.get('play_notify_ip');
+      // var play_notify_port = pushletEvent.get('play_notify_port');
+      //alert(play_notify_action);
+      //alert(play_notify_ip);
+      //alert(play_notify_port);
+      if(play_notify_ip == sIPAddr)
+      {
+        var url = "udp://@" + play_notify_ip + ":" + play_notify_port;
+
+        var winID = port_map.get(play_notify_port.toString());
+        vlcplayer.windowID = winID;
+        if(play_notify_action == "start")
+        {
+          vlcplayer.url = "udp://@" + play_notify_ip + ":" + "6000";
+          
+        }
+        else if(play_notify_action == "stop")
+        {
+          vlcplayer.StopStream(vlcplayer.windowID);
+        }
+      }
+      else
+      {
+        
+      }
+    }
+
+  </script>
+  
+  <script language="javascript">
+    
+    //初始化端口集合
+    var port_map = new Map();
+    port_map.put("6000","1");
+
+    
+
+    var service = locator.ConnectServer();
+    service.Security_.ImpersonationLevel=3;
+    service.InstancesOfAsync(foo, 'Win32_NetworkAdapterConfiguration');
+  </script>
+
+  <script FOR="foo" EVENT="OnObjectReady(objObject,objAsyncContext)" LANGUAGE="JScript">
+    if(objObject.IPEnabled != null && objObject.IPEnabled != "undefined" && objObject.IPEnabled == true){
+      if(objObject.IPEnabled && objObject.IPAddress(0) !=null && objObject.IPAddress(0) != "undefined")
+      {
+        sIPAddr = objObject.IPAddress(0);
+      }
+      
+      
+      }
+    </script>
+    
+    <script FOR="foo" EVENT="OnCompleted(hResult,pErrorObject, pAsyncContext)" LANGUAGE="JScript">
+    //alert(sIPAddr);
+         //设置4个窗口的URL
+         /*var url = "udp://@" + sIPAddr + ":" + 6000;
+         vlcplayer.windowID = 1;
+         vlcplayer.url = url;
+         url = "udp://@" + sIPAddr + ":" + 6010;
+         vlcplayer.windowID = 2;
+         vlcplayer.url = url;
+         url = "udp://@" + sIPAddr + ":" + 6020;
+         vlcplayer.windowID = 3;
+         vlcplayer.url = url;
+         url = "udp://@" + sIPAddr + ":" + 6030;
+         vlcplayer.windowID = 4;
+         vlcplayer.url = url;*/
+       </script>
+
+
+       <script type="text/javascript">
+        function sendVideoInfo(dvrip,devicechannelindex){
+
+
+          $.post("/function/viewVideo/",{"dvrip":dvrip,"devicechannelindex":devicechannelindex},
+            function(results){
+              onData(results,"stop");
+              onData(results,"start");
+            });  
+        }
+
+        function closeViewVideoFun(dvrip,devicechannelindex)
+        {
+        $.post("/function/closeView/",{},
+          function(results){   
+          });          
+        };
+
+        $('#restartServices').on('click', function (e) {
+          $.post("/function/restartServices/",{},
+            function(results){
+ 
+            });
+        });        
+
+      </script>
+
+
+
+    </div>
+  </div> <!-- /container -->
+  {% endblock %}
+
+  <script type="text/javascript">
+  {% block basefunctions %}
+       function restartService(){
+          $.post("/function/restartServices/",{},
+            function(results){
+ 
+            });
+       };
+  {% endblock %}
+  </script>
+</body>
+</html>
